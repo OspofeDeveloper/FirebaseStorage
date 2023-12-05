@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextClock
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="italic"
+        android:textColor="@color/black"
+        android:layout_marginTop="24dp"
+        android:textSize="60sp"
+        android:text="Firebase \nStorage 🚀"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNavigateToXml"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="36dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnNavigateToCompose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        android:text="Navigate to Xml"
+        android:textColor="@color/yellow"
+        android:backgroundTint="@color/white"
+        app:strokeColor="@color/yellow"
+        app:strokeWidth="2dp"
+        app:rippleColor="@color/yellow"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNavigateToCompose"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnNavigateToXml"
+        android:text="Navigate to Compose"
+        android:textColor="@color/green"
+        android:backgroundTint="@color/white"
+        app:strokeColor="@color/green"
+        app:strokeWidth="2dp"
+        app:rippleColor="@color/green"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
