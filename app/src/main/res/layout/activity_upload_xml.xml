@@ -6,6 +6,41 @@
     android:layout_height="match_parent"
     tools:context=".ui.xml.upload.UploadXmlActivity">
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvImage"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="12dp"
+        android:layout_margin="36dp">
+
+        <ImageView
+            android:id="@+id/ivImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+        <ImageView
+            android:id="@+id/ivPlaceHolder"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            app:tint="@color/yellow"
+            android:src="@drawable/ic_upload_image"/>
+
+        <ProgressBar
+            android:id="@+id/pbImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/yellow"/>
+
+    </androidx.cardview.widget.CardView>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabImage"
         android:layout_width="wrap_content"
@@ -15,7 +50,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cvImage"
         app:tint="@color/white" />
 
 

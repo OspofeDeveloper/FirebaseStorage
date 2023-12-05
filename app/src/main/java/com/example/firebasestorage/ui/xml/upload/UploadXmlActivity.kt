@@ -10,10 +10,16 @@ import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
 import com.example.firebasestorage.R
 import com.example.firebasestorage.databinding.ActivityUploadXmlBinding
 import com.example.firebasestorage.databinding.DialogImageSelectorBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -57,7 +63,12 @@ class UploadXmlActivity : AppCompatActivity() {
 
     private val intentCameraLauncher = registerForActivityResult(TakePicture()) {
         if (it && uri.path?.isNotEmpty() == true) { //Si da success y path de la uri no es nulo
-            uploadXmlViewModel.uploadBasicImage(uri)
+
+            //Llamamos a uploadAndGetImage y si nos devuelve una uri pq ha ido correcto, llamamos a
+            //showNewImage para cargar esa imagen
+            uploadXmlViewModel.uploadAndGetImage(uri) {downloadUri ->
+                showNewImage(downloadUri)
+            }
         }
     }
 
@@ -66,10 +77,16 @@ class UploadXmlActivity : AppCompatActivity() {
      * En este caso nos devuelve una uri que nos devuelve la propia galeria y simplemente subimos la
      * imagen
      */
-    private val intentGalleryLauncher = registerForActivityResult(GetContent()) {uri ->
+    private val intentGalleryLauncher = registerForActivityResult(GetContent()) { uri ->
         uri?.let {
-            uploadXmlViewModel.uploadBasicImage(it)
+            uploadXmlViewModel.uploadAndGetImage(it) {downloadUri ->
+                showNewImage(downloadUri)
+            }
         }
+    }
+
+    private fun showNewImage(downloadUri: Uri) {
+        Glide.with(this).load(downloadUri).into(binding.ivImage)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +98,21 @@ class UploadXmlActivity : AppCompatActivity() {
 
     private fun initUI() {
         initListeners()
+        initUIState()
+    }
+
+    private fun initUIState() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                uploadXmlViewModel.isLoading.collect {
+                    binding.pbImage.isVisible = it
+                    if (it) {
+                        binding.ivPlaceHolder.isVisible = false
+                        binding.ivImage.setImageDrawable(null)
+                    }
+                }
+            }
+        }
     }
 
     private fun initListeners() {
@@ -116,7 +148,7 @@ class UploadXmlActivity : AppCompatActivity() {
      *      - "video/*" (video de cualquier tipo
      *      -  "*/*" (cualquier cosa)
      *      ...
-     */*/
+    */*/
     private fun getImageFromGallery() {
         intentGalleryLauncher.launch("image/*")
     }

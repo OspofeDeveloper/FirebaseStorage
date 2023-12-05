@@ -2,8 +2,13 @@ package com.example.firebasestorage.data
 
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class StorageService @Inject constructor(
     private val firebaseStorage: FirebaseStorage
@@ -42,16 +47,43 @@ class StorageService @Inject constructor(
      * solo tendriamos que cargar la imagen en algún componente.
      *
      * Entonces con esta funcion lo que hacemo es recuperar la Uri de esa imagen a descargar, pero para
-     * cargar la uri que necesitamos, necesitaremos alguna dependencia
+     * cargar la uri que necesitamos, necesitaremos alguna dependencia (Glide en xml)
      */
     suspend fun downloadBasicImage(): Uri {
         //val reference = firebaseStorage.reference.child("$userId/profile.png")
-        val reference = firebaseStorage.reference.child("ejemplo/International_Pokémon_logo.svg.png")
+        val reference =
+            firebaseStorage.reference.child("ejemplo/International_Pokémon_logo.svg.png")
 
-        //Recuperamos la uri de nuestra reference
-        //El problema es que es una task que es un código que se está ejecutando pero que no sabemos
-        //cuando se va a resolver, por lo tanto esperamos a que acabe con await()
+        /*
+        Recuperamos la uri de nuestra reference
+        El problema es que es una task que es un código que se está ejecutando pero que no sabemos
+        cuando se va a resolver, por lo tanto esperamos a que acabe con await().
+
+        Otra forma de hacerlo es en lugar del await() usar el suspendCancellableCoroutine para así
+        aprovechar las funcionaldades de los listeners y tener más control
+        */
         return reference.downloadUrl.await()
+    }
+
+    suspend fun uploadAndDownloadImage(uri: Uri): Uri {
+        return suspendCancellableCoroutine<Uri> { cancellableContinuation ->
+            val reference = firebaseStorage.reference.child("download/${uri.lastPathSegment}")
+
+            reference.putFile(uri).addOnSuccessListener { referenceToWhereImageIs ->
+                downloadImage(referenceToWhereImageIs, cancellableContinuation)
+            }.addOnFailureListener {
+                cancellableContinuation.resumeWithException(it)
+            }
+        }
+    }
+
+    private fun downloadImage(
+        uploadTask: UploadTask.TaskSnapshot,
+        cancellableContinuation: CancellableContinuation<Uri>
+    ) {
+        uploadTask.storage.downloadUrl
+            .addOnSuccessListener { uri -> cancellableContinuation.resume(uri) }
+            .addOnFailureListener { cancellableContinuation.resumeWithException(it) }
     }
 
 }
