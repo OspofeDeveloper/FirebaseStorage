@@ -192,7 +192,7 @@ class StorageService @Inject constructor(
      * por lo tanto recuperamos la lista de imagenes, esperamos a que la recupere toda porque es
      * una task y mapeamos dichas referencias para recuperar las Uri
      */
-    private suspend fun getAllImages(): List<Uri> {
+    suspend fun getAllImages(): List<Uri> {
         val reference = firebaseStorage.reference.child("download/")
 
         /*reference.listAll().addOnSuccessListener { result ->
