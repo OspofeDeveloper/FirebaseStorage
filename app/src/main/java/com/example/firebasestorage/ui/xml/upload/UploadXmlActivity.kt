@@ -112,7 +112,10 @@ class UploadXmlActivity : AppCompatActivity() {
     /**
      * A la hora de lanzar el launcher de gallery en este caso, le tenemos que indicar que formatos
      * le vamos a permitir que seleccione. Como nosotros queremos seleccionar imagenes se lo indicamos
-     * añadiendo -> "image/*" (imagenes de cualquier tipo)
+     * añadiendo -> "image/*" (imagenes de cualquier tipo). Podemos poner que coja otras cosas como:
+     *      - "video/*" (video de cualquier tipo
+     *      -  "*/*" (cualquier cosa)
+     *      ...
      */*/
     private fun getImageFromGallery() {
         intentGalleryLauncher.launch("image/*")
