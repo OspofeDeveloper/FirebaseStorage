@@ -3,19 +3,18 @@ package com.example.firebasestorage.ui.xml.upload
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
-import com.example.firebasestorage.R
 import com.example.firebasestorage.databinding.ActivityUploadXmlBinding
 import com.example.firebasestorage.databinding.DialogImageSelectorBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,7 +65,8 @@ class UploadXmlActivity : AppCompatActivity() {
 
             //Llamamos a uploadAndGetImage y si nos devuelve una uri pq ha ido correcto, llamamos a
             //showNewImage para cargar esa imagen
-            uploadXmlViewModel.uploadAndGetImage(uri) {downloadUri ->
+            uploadXmlViewModel.uploadAndGetImage(uri) { downloadUri ->
+                clearText()
                 showNewImage(downloadUri)
             }
         }
@@ -79,7 +79,7 @@ class UploadXmlActivity : AppCompatActivity() {
      */
     private val intentGalleryLauncher = registerForActivityResult(GetContent()) { uri ->
         uri?.let {
-            uploadXmlViewModel.uploadAndGetImage(it) {downloadUri ->
+            uploadXmlViewModel.uploadAndGetImage(it) { downloadUri ->
                 showNewImage(downloadUri)
             }
         }
@@ -200,7 +200,16 @@ class UploadXmlActivity : AppCompatActivity() {
      * Lo bueno de esta forma es que podemos organizar los archivos por la fecha
      */
     private fun createFile(): File {
-        val name = SimpleDateFormat("yyyyMMdd_hhmmss").format(Date()) + "image"
+        val userTitle = binding.etTitle.text.toString()
+        val name = userTitle.ifEmpty {
+            SimpleDateFormat("yyyyMMdd_hhmmss").format(Date()) + "image"
+        }
+
         return File.createTempFile(name, ".jpg", externalCacheDir)
+    }
+
+    private fun clearText() {
+        binding.etTitle.setText("")
+        binding.etTitle.clearFocus()
     }
 }
