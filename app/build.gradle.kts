@@ -79,4 +79,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
+
+    //Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }
