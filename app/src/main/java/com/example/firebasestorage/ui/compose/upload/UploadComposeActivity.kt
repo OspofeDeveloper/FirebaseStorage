@@ -42,6 +42,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -53,6 +54,7 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.example.firebasestorage.R
 import com.example.firebasestorage.databinding.ActivityUploadComposeBinding
+import com.example.firebasestorage.ui.compose.list.ListComposeActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.text.SimpleDateFormat
@@ -220,6 +222,17 @@ class UploadComposeActivity : AppCompatActivity() {
                 }
             }
             Spacer(modifier = Modifier.weight(2f))
+            val context = LocalContext.current
+            OutlinedButton(onClick = { startActivity(ListComposeActivity.create(context)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp)
+                    .align(Alignment.CenterHorizontally),
+                border = BorderStroke(2.dp, colorResource(id = R.color.green)),
+                shape = RoundedCornerShape(42)
+            ) {
+                Text("Navigate to list", color = colorResource(id = R.color.green))
+            }
         }
     }
 
