@@ -69,9 +69,7 @@ class StorageService @Inject constructor(
     }
 
     suspend fun uploadAndDownloadImage(uri: Uri): Uri {
-        readMetadataAdvanced()
-        return Uri.EMPTY
-        /*return suspendCancellableCoroutine<Uri> { cancellableContinuation ->
+        return suspendCancellableCoroutine<Uri> { cancellableContinuation ->
             val reference = firebaseStorage.reference.child("download/${uri.lastPathSegment}")
 
             reference.putFile(uri, createMetadata())
@@ -80,7 +78,7 @@ class StorageService @Inject constructor(
                 }.addOnFailureListener {
                 cancellableContinuation.resumeWithException(it)
             }
-        }*/
+        }
     }
 
     private fun downloadImage(
@@ -144,5 +142,65 @@ class StorageService @Inject constructor(
                 Log.i("Ospofe Metadata", "Para la key: $key el valor es $value")
             }
         }
+    }
+
+    /**
+     * Borramos una imagen. Para ello necesitamos la referencia de la imagen y hacer delete en la
+     * referencia. Esta nos devuelve una task, por lo tanto podemos añadir el cancellableCoroutine
+     * y ponerle los listeners, poner el await() o LA MEJOR OPCIÓN ES PONERLE UN isSuccessful, el cual
+     * me devuelve TRUE si se ha borrado o FALSE si no lo ha hecho
+     */
+    private fun removeImage(): Boolean {
+        val reference =
+            firebaseStorage.reference.child("ejemplo/International_Pokémon_logo.svg.png")
+        return reference.delete().isSuccessful
+    }
+
+    /**
+     * Esta función es para controlar el progreso de subida de un archivo o imagen o lo que sea a
+     * través de un progressbar.
+     *
+     * La gran mayoria de aplicaciones no utilizan esto, sino que ponen una progressbar que avanza
+     * muy lento y en caso que se suba antes de que acabe abortan el progresso y lo avanzan hasta el
+     * final.
+     *
+     * En nuestro caso como estamos solo subiendo imagenes que son subidas muy rápidas, realmente no
+     * es necesario poner un progressbar de estos, pero como firebase nos deja controlarlo de forma
+     * real pues haremos el código para saber como se hace y usarlo en otros contextos donde los
+     * archivos o objetos que subimos sean mas pesados.
+     *
+     * Para eso usamos el listener de Progress, el cual nos da el progreso a tiempo real a través
+     * de mirar los bytes que lleva subido y los bytes totales de lo que subimos
+     */
+    private fun uploadImageWithProgress(uri: Uri) {
+        val reference = firebaseStorage.reference.child("loquesea/miImagen.png")
+        reference.putFile(uri).addOnProgressListener { uploadTask ->
+            val progress = (100.0 * uploadTask.bytesTransferred) / uploadTask.totalByteCount
+        }
+    }
+
+    /**
+     * Si queremos recuperar un listado de imagenes solamente le tenemos que indicar la carpeta
+     * donde están guardadas esas imagenes y nos devuelve una lista con las referencias de todas
+     * las imagenes de esa carpeta.
+     *
+     * Entonces si queremos descargarlas tendremos que añadir un forEach y nos quedamos con todos
+     * los items que son dichas imagenes, y de cada item podemos sacar sualquier atributo de
+     * estos -> download, metadata, name, parh... (Es lo que está comentado)
+     *
+     * Pero el 99% de las veces lo que vamos a querer es simplemente recuperar todas las imagenes,
+     * por lo tanto recuperamos la lista de imagenes, esperamos a que la recupere toda porque es
+     * una task y mapeamos dichas referencias para recuperar las Uri
+     */
+    private suspend fun getAllImages(): List<Uri> {
+        val reference = firebaseStorage.reference.child("download/")
+
+        /*reference.listAll().addOnSuccessListener { result ->
+            result.items.forEach {
+                Log.i("Todas las imagenes", it.name)
+            }
+        }*/
+
+        return reference.listAll().await().items.map { it.downloadUrl.await() }
     }
 }
