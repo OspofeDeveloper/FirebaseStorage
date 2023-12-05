@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Paths>
+    <!--
+    Esta ruta va a ser la ruta del caché externo. Cuando creamos los ficheros temporales que
+    hacen falta para las URIs, estos hay que almacenarlos en algún sitio, y se van a almacenar en
+    este path, en un path que se va a llamar my_image/nombre_fichero, y va a estar en un caché externo
+    -->
+    <external-cache-path
+        name="my_image"
+        path="/" />
+</Paths>

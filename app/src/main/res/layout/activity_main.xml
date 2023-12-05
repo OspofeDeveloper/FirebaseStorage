@@ -6,14 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextClock
+    <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textStyle="italic"
         android:textColor="@color/black"
         android:layout_marginTop="24dp"
         android:textSize="60sp"
-        android:text="Firebase \nStorage 🚀"
+        android:text="Firebase Storage 🚀"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

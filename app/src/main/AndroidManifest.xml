@@ -28,6 +28,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+        Indicamos al proveedor que cuando se comunique, las imagenes estan en el path que
+        definimos en meta-data
+        -->
+        <provider
+            android:authorities="com.example.firebasestorage.provider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/path_provider"/>
+        </provider>
     </application>
 
 </manifest>
