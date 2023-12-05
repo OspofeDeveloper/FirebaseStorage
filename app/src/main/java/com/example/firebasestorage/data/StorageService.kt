@@ -1,8 +1,11 @@
 package com.example.firebasestorage.data
 
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.UploadTask
+import com.google.firebase.storage.storageMetadata
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
@@ -66,15 +69,18 @@ class StorageService @Inject constructor(
     }
 
     suspend fun uploadAndDownloadImage(uri: Uri): Uri {
-        return suspendCancellableCoroutine<Uri> { cancellableContinuation ->
+        readMetadataAdvanced()
+        return Uri.EMPTY
+        /*return suspendCancellableCoroutine<Uri> { cancellableContinuation ->
             val reference = firebaseStorage.reference.child("download/${uri.lastPathSegment}")
 
-            reference.putFile(uri).addOnSuccessListener { referenceToWhereImageIs ->
-                downloadImage(referenceToWhereImageIs, cancellableContinuation)
-            }.addOnFailureListener {
+            reference.putFile(uri, createMetadata())
+                .addOnSuccessListener { referenceToWhereImageIs ->
+                    downloadImage(referenceToWhereImageIs, cancellableContinuation)
+                }.addOnFailureListener {
                 cancellableContinuation.resumeWithException(it)
             }
-        }
+        }*/
     }
 
     private fun downloadImage(
@@ -86,4 +92,57 @@ class StorageService @Inject constructor(
             .addOnFailureListener { cancellableContinuation.resumeWithException(it) }
     }
 
+    /**
+     * Los metadatos no son mas que ciertos datos que nos dicen cosas especificas de, en nuestro caso,
+     * las imagenes. Estos metadatos son conjuntos clave-valor y podemos usar ciertos metadatos
+     * que vienen definidos como contentType, al igual que ciertos metadatos customizados según
+     * lo que nosotros queramos. Lo único es que setCustomMetadata solo coje strings, asi que si le
+     * queremos meter cualquier otro tipo de valor lo tendremos que transformar a String.
+     *
+     * Estos metadatos los podemos usar cuando vamos a subir la imagen, en la función putFile podemos
+     * añadirle esos metadatos a la imagen que le pasamos por uri.
+     *
+     * Y por ultimo, si metemos metadatos en un string que ya tiene, los antiguos son reemplazados
+     * por los nuevos
+     */
+    private fun createMetadata(): StorageMetadata {
+        val metadata = storageMetadata {
+            contentType = "image/jpeg"
+            setCustomMetadata("date", "25-04-2002")
+            setCustomMetadata("anyKey", "anyValue")
+        }
+        return metadata
+    }
+
+    /**
+     * Este método en lugar de crear metadatos como createMetadata, nos permite leer los metadatos
+     * de una imagen.
+     *
+     * Para ello en este caso obviamente necesitamos la referencia de una imagen que exista y esta
+     * imagen tiene que contener metadatos. En el caso de que no los tenga se nos devolvera un string
+     * vacio
+     */
+    private suspend fun readMetadataBasic() {
+        val reference =
+            firebaseStorage.reference.child("download/metadata6547209743537309110.jpg")
+
+        val response = reference.metadata.await()
+        val metainfo = response.getCustomMetadata("date")
+        Log.i("Ospofe Metainfo", metainfo.orEmpty())
+    }
+
+    /**
+     * En este metodo miraremos como podemos recuperar todos los metadatos de la imagen.
+     */
+    private suspend fun readMetadataAdvanced() {
+        val reference =
+            firebaseStorage.reference.child("download/metadata6547209743537309110.jpg")
+
+        val response = reference.metadata.await()
+        response.customMetadataKeys.forEach { key ->
+            response.getCustomMetadata(key)?.let {value ->
+                Log.i("Ospofe Metadata", "Para la key: $key el valor es $value")
+            }
+        }
+    }
 }
