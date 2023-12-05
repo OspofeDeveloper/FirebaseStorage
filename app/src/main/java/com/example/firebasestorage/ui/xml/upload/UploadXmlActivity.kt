@@ -8,9 +8,11 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import com.example.firebasestorage.R
 import com.example.firebasestorage.databinding.ActivityUploadXmlBinding
+import com.example.firebasestorage.databinding.DialogImageSelectorBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.text.SimpleDateFormat
@@ -59,6 +61,17 @@ class UploadXmlActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Creamos otro launcher para coger información de la galeria.
+     * En este caso nos devuelve una uri que nos devuelve la propia galeria y simplemente subimos la
+     * imagen
+     */
+    private val intentGalleryLauncher = registerForActivityResult(GetContent()) {uri ->
+        uri?.let {
+            uploadXmlViewModel.uploadBasicImage(it)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUploadXmlBinding.inflate(layoutInflater)
@@ -71,7 +84,38 @@ class UploadXmlActivity : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.fabImage.setOnClickListener { takePhoto() }
+        binding.fabImage.setOnClickListener { showImageDalog() }
+    }
+
+    private fun showImageDalog() {
+        val dialogBinding = DialogImageSelectorBinding.inflate(layoutInflater)
+        val dialog = AlertDialog.Builder(this).apply {
+            setView(dialogBinding.root)
+        }.create()
+
+        dialogBinding.btnTakePhoto.setOnClickListener {
+            takePhoto()
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnGallery.setOnClickListener {
+            getImageFromGallery()
+            dialog.dismiss()
+        }
+
+        //Ponemos el background del dialog transparente para que se vea el diseño del cardview que
+        //hemos hecho en la vista xml
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+    }
+
+    /**
+     * A la hora de lanzar el launcher de gallery en este caso, le tenemos que indicar que formatos
+     * le vamos a permitir que seleccione. Como nosotros queremos seleccionar imagenes se lo indicamos
+     * añadiendo -> "image/*" (imagenes de cualquier tipo)
+     */*/
+    private fun getImageFromGallery() {
+        intentGalleryLauncher.launch("image/*")
     }
 
     /**
